@@ -8,7 +8,7 @@ from src.utils import set_seed, count_parameters, plot_history, plot_predictions
 
 # ================= 配置区域 =================
 CONFIG = {
-    "DATA_DIR": "./data",
+    "DATA_DIR": "./dataset",
     "RESULTS_DIR": "./results",
     "DEVICE": "cuda" if torch.cuda.is_available() else "cpu",
     "IMG_SIZE": 256,
