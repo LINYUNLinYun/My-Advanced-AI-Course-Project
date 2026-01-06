@@ -1,27 +1,30 @@
 import os
 import torch
 import time
-from src.dataset import get_dataloaders
+# from src.dataset import get_dataloaders
+from src.dataset_clothes import get_dataloaders
 from src.models import get_model
 from src.trainer import Trainer
 from src.utils import set_seed, count_parameters, plot_history, plot_predictions, save_logs
 
 # ================= 配置区域 =================
 CONFIG = {
-    "DATA_DIR": "./dataset",
+    "DATA_DIR": "./dataset/archive",
     "RESULTS_DIR": "./results",
     "DEVICE": "cuda" if torch.cuda.is_available() else "cpu",
     "IMG_SIZE": 256,
     "BATCH_SIZE": 32,     # 8GB显存建议16
-    "EPOCHS": 30,
+    "EPOCHS": 1,
     "LR": 0.0001,
     "SEED": 42,
     "MODELS": [
         "CBAM_UNET",
-        "UNet_ResNet34",       # Baseline
-        "UNet++_ResNet34",     # 架构复杂化
-        "AttnUNet_ResNet34",   # 机制改进
-        "TransUNet_MiT"        # Transformer (新颖点)
+        "UNET",
+        "UNET_PLUS_PLUS",
+        # "UNet_ResNet34",       # Baseline
+        # "UNet++_ResNet34",     # 架构复杂化
+        # "AttnUNet_ResNet34",   # 机制改进
+        # "TransUNet_MiT"        # Transformer (新颖点)
     ]
 }
 # ===========================================

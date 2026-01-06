@@ -47,8 +47,14 @@ def get_model(model_name):
         )
 
     elif model_name == "CBAM_UNET":
-        from src.attention_UNET import AttentionUNet
+        from src.attention_unet import AttentionUNet
         return AttentionUNet(n_channels=3, n_classes=1, base_c=64)
+    elif model_name == "UNET":
+        from src.unet import UNet
+        return UNet(n_channels=3, n_classes=1, base_c=64)
+    elif model_name == "UNET_PLUS_PLUS":
+        from src.unetplusplus import NestedUNet
+        return NestedUNet(n_channels=3, n_classes=1, base_c=64)
     
     else:
         raise ValueError(f"未知的模型名称: {model_name}")
