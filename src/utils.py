@@ -16,7 +16,7 @@ def count_parameters(model):
     """计算模型参数量 (Millions)"""
     return sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6
 
-def plot_history(results, save_dir):
+def plot_history(results, save_dir, save_name = "metrics_comparison.png"):
     """绘制训练 Loss 和 IoU 曲线"""
     plt.figure(figsize=(12, 5))
     
@@ -38,10 +38,10 @@ def plot_history(results, save_dir):
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    plt.savefig(os.path.join(save_dir, "metrics_comparison.png"))
+    plt.savefig(os.path.join(save_dir, save_name))
     plt.close()
 
-def plot_predictions(models, loader, device, save_dir, num_samples=3):
+def plot_predictions(models, loader, device, save_dir, num_samples=3,save_name="visual_comparison.png"):
     """可视化预测结果"""
     images, masks = next(iter(loader))
     images = images[:num_samples].to(device)
@@ -82,13 +82,13 @@ def plot_predictions(models, loader, device, save_dir, num_samples=3):
             axes[i, 2+j].axis('off')
             
     plt.tight_layout()
-    plt.savefig(os.path.join(save_dir, "visual_comparison.png"))
+    plt.savefig(os.path.join(save_dir, save_name))
     plt.close()
 
-def save_logs(results, save_dir):
+def save_logs(results, save_dir, save_name="experiment_logs.csv"):
     """保存 CSV 数据"""
     data = {}
     for name, hist in results.items():
         data[f"{name}_loss"] = hist["loss"]
         data[f"{name}_iou"] = hist["iou"]
-    pd.DataFrame(data).to_csv(os.path.join(save_dir, "experiment_logs.csv"))
+    pd.DataFrame(data).to_csv(os.path.join(save_dir, save_name), index_label="epoch")

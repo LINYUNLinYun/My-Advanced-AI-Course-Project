@@ -12,11 +12,12 @@ CONFIG = {
     "RESULTS_DIR": "./results",
     "DEVICE": "cuda" if torch.cuda.is_available() else "cpu",
     "IMG_SIZE": 256,
-    "BATCH_SIZE": 16,     # 8GB显存建议16
-    "EPOCHS": 10,
+    "BATCH_SIZE": 32,     # 8GB显存建议16
+    "EPOCHS": 30,
     "LR": 0.0001,
     "SEED": 42,
     "MODELS": [
+        "CBAM_UNET",
         "UNet_ResNet34",       # Baseline
         "UNet++_ResNet34",     # 架构复杂化
         "AttnUNet_ResNet34",   # 机制改进
@@ -73,16 +74,16 @@ def main():
         now_date_time = time.strftime("%Y-%m-%d_%H-%M-%S")
 
         # 保存权重
-        torch.save(model.state_dict(), os.path.join(CONFIG["RESULTS_DIR"], f"{now_date_time+"_"+model_name}.pth"))
+        torch.save(model.state_dict(), os.path.join(CONFIG["RESULTS_DIR"], f"{now_date_time}_{model_name}.pth"))
         
         # 释放显存
         torch.cuda.empty_cache()
         
     # 4. 生成报告
     print(f"\n📊 正在生成对比报告...")
-    plot_history(results, CONFIG["RESULTS_DIR"])
-    plot_predictions(trained_models, test_loader, CONFIG["DEVICE"], CONFIG["RESULTS_DIR"])
-    save_logs(results, CONFIG["RESULTS_DIR"])
+    plot_history(results, CONFIG["RESULTS_DIR"],save_name=f"{now_date_time}_metrics_comparison.png")
+    plot_predictions(trained_models, test_loader, CONFIG["DEVICE"], CONFIG["RESULTS_DIR"],save_name=f"{now_date_time}_visual_comparison.png")
+    save_logs(results, CONFIG["RESULTS_DIR"],save_name=f"{now_date_time}_experiment_logs.csv")
     
     print(f"✅ 所有实验完成！结果已保存在 {CONFIG['RESULTS_DIR']}")
 

@@ -11,7 +11,7 @@ class Trainer:
         self.device = device
         self.criterion = smp.losses.DiceLoss(mode='binary')
         self.optimizer = optim.AdamW(self.model.parameters(), lr=lr)
-        self.scaler = torch.cuda.amp.GradScaler() # 混合精度训练
+        self.scaler = torch.amp.GradScaler('cuda') # 混合精度训练
         
     def train_epoch(self, loader):
         self.model.train()
@@ -23,12 +23,12 @@ class Trainer:
             self.optimizer.zero_grad()
             
             # 开启混合精度，省显存+加速
-            with torch.cuda.amp.autocast():
+            with torch.amp.autocast('cuda'):
                 outputs = self.model(images)
                 loss = self.criterion(outputs, masks)
             
             self.scaler.scale(loss).backward()
-            self.scaler.scale(self.optimizer).step()
+            self.scaler.step(self.optimizer)
             self.scaler.update()
             
             running_loss += loss.item()

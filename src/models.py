@@ -45,6 +45,10 @@ def get_model(model_name):
             encoder_weights=weights, 
             in_channels=3, classes=1
         )
+
+    elif model_name == "CBAM_UNET":
+        from src.attention_UNET import AttentionUNet
+        return AttentionUNet(n_channels=3, n_classes=1, base_c=64)
     
     else:
         raise ValueError(f"未知的模型名称: {model_name}")
