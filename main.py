@@ -69,8 +69,11 @@ def main():
         results[model_name] = history
         trained_models[model_name] = model
         
+        # 获取现在的日期、时间作为保存文件名的一部分
+        now_date_time = time.strftime("%Y-%m-%d_%H-%M-%S")
+
         # 保存权重
-        torch.save(model.state_dict(), os.path.join(CONFIG["RESULTS_DIR"], f"{model_name}.pth"))
+        torch.save(model.state_dict(), os.path.join(CONFIG["RESULTS_DIR"], f"{now_date_time+"_"+model_name}.pth"))
         
         # 释放显存
         torch.cuda.empty_cache()
