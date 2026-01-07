@@ -54,18 +54,28 @@ def main():
         # 训练管理器
         trainer = Trainer(model, CONFIG["DEVICE"], CONFIG["LR"])
         
-        history = {"loss": [], "iou": []}
+        history = {"loss": [], "iou": [], "dice": [], "ap": [], "pq": []}
         start_time = time.time()
         
         # Training Loop
         for epoch in range(CONFIG["EPOCHS"]):
             train_loss = trainer.train_epoch(train_loader)
-            val_iou = trainer.evaluate(test_loader)
-            
+            val_metrics = trainer.evaluate(test_loader)
+
             history["loss"].append(train_loss)
-            history["iou"].append(val_iou.item())
+            history["iou"].append(val_metrics["iou"])
+            history["dice"].append(val_metrics["dice"])
+            history["ap"].append(val_metrics["ap"])
+            history["pq"].append(val_metrics["pq"])
             
-            print(f"Ep {epoch+1}/{CONFIG['EPOCHS']} | Loss: {train_loss:.4f} | IoU: {val_iou:.4f}")
+            print(
+                f"Ep {epoch+1}/{CONFIG['EPOCHS']} | "
+                f"Loss: {train_loss:.4f} | "
+                f"IoU: {val_metrics['iou']:.4f} | "
+                f"Dice: {val_metrics['dice']:.4f} | "
+                f"AP: {val_metrics['ap']:.4f} | "
+                f"PQ: {val_metrics['pq']:.4f}"
+            )
             
         print(f"耗时: {(time.time()-start_time)/60:.1f} min")
         
