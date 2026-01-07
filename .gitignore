@@ -7,7 +7,7 @@ dataset/
 
 # 忽略训练结果（因为权重文件很大）
 results/*.pth
-results/*.png
+# results/*.png
 
 
 # # 也可以选择保留图片和日志，方便查看

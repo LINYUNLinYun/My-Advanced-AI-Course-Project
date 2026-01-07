@@ -30,7 +30,17 @@ class ClothingDataset(Dataset):
 
         # 获取所有图片文件名，并排序确保对应
         # 过滤出 jpg/png 文件
-        self.img_files = sorted([f for f in os.listdir(self.images_dir) if f.endswith(('.jpg', '.png', '.jpeg'))])
+        all_img_files = sorted([f for f in os.listdir(self.images_dir) if f.endswith(('.jpg', '.png', '.jpeg'))])
+        
+        # 【关键修复】只保留有对应标注文件的图片
+        self.img_files = []
+        for img_name in all_img_files:
+            mask_name = os.path.splitext(img_name)[0] + ".mat"
+            mask_path = os.path.join(self.labels_dir, mask_name)
+            if os.path.exists(mask_path):
+                self.img_files.append(img_name)
+        
+        print(f"Found {len(self.img_files)} images with valid annotations (out of {len(all_img_files)} total images)")
         
         # 手动划分训练集和测试集 (这里按 9:1 划分)
         split_idx = int(len(self.img_files) * 0.9)
@@ -63,8 +73,8 @@ class ClothingDataset(Dataset):
                 raise KeyError(f"MAT 文件中未找到 'groundtruth': {mask_path}")
             mask_np = mat['groundtruth']  # (H, W), uint8 类别索引
         else:
-            # 备用方案：找不到就全黑（背景）
-            mask_np = np.zeros((self.img_size, self.img_size), dtype=np.uint8)
+            # 这种情况不应该发生，因为已经在__init__中过滤了
+            raise FileNotFoundError(f"Mask file not found: {mask_path}")
 
         # 4. 调整大小 (模仿 PetDataset)
         image = image.resize((self.img_size, self.img_size), Image.BILINEAR)

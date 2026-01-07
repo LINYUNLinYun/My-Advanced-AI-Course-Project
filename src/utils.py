@@ -5,6 +5,10 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# 使用包内导入，确保从项目根目录运行时可以找到模块
+from src.models import get_model
+from src.dataset_clothes import get_dataloaders
+
 def set_seed(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -92,3 +96,57 @@ def save_logs(results, save_dir, save_name="experiment_logs.csv"):
         data[f"{name}_loss"] = hist["loss"]
         data[f"{name}_iou"] = hist["iou"]
     pd.DataFrame(data).to_csv(os.path.join(save_dir, save_name), index_label="epoch")
+
+
+def visualize_saved_models(model_specs, data_dir, device, save_dir, img_size=256, batch_size=4, num_samples=3, save_name="visual_comparison.png"):
+    """
+    加载任意 .pt 模型权重并生成可视化对比图。
+
+    Args:
+        model_specs: 列表/元组 [(model_name, ckpt_path), ...]，model_name 与 get_model 支持的名字一致。
+        data_dir: 数据根目录，例 ./dataset/archive
+        device: 'cuda' 或 'cpu'
+        save_dir: 输出目录
+        img_size: 输入尺寸
+        batch_size: 可视化时的 batch 大小
+        num_samples: 可视化的样本数量（从 batch 前几个截取）
+        save_name: 输出文件名
+    """
+    os.makedirs(save_dir, exist_ok=True)
+
+    # 准备数据（只需要一个 loader）
+    _, test_loader = get_dataloaders(data_dir, batch_size=batch_size, img_size=img_size)
+
+    # 加载模型
+    models = {}
+    for model_name, ckpt_path in model_specs:
+        model = get_model(model_name)
+        state = torch.load(ckpt_path, map_location=device)
+        model.load_state_dict(state)
+        model.to(device)
+        model.eval()
+        models[model_name] = model
+
+    # 生成可视化
+    plot_predictions(models, test_loader, device, save_dir, num_samples=num_samples, save_name=save_name)
+
+    return os.path.join(save_dir, save_name)
+
+if __name__ == "__main__":
+    # from src.utils import visualize_saved_models
+    model_specs = [
+        ("CBAM_UNET", "results/2026-01-07_10-21-40_CBAM_UNET.pth"),
+        ("UNET", "results/2026-01-07_10-22-47_UNET.pth"),
+        ("UNET_PLUS_PLUS", "results/2026-01-07_10-25-41_UNETPLUSPLUS.pth"),
+    ]
+    out_path = visualize_saved_models(
+        model_specs,
+        data_dir="./dataset/archive",
+        device="cuda",
+        save_dir="./results",
+        img_size=256,
+        batch_size=4,
+        num_samples=3,
+        save_name="visual_comparison.png",
+    )
+    print("saved to:", out_path)

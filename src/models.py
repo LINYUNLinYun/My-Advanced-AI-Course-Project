@@ -52,7 +52,7 @@ def get_model(model_name):
     elif model_name == "UNET":
         from src.unet import UNet
         return UNet(n_channels=3, n_classes=1, base_c=64)
-    elif model_name == "UNET_PLUS_PLUS":
+    elif model_name == "UNETPLUSPLUS":
         from src.unetplusplus import NestedUNet
         return NestedUNet(n_channels=3, n_classes=1, base_c=64)
     

@@ -13,14 +13,14 @@ CONFIG = {
     "RESULTS_DIR": "./results",
     "DEVICE": "cuda" if torch.cuda.is_available() else "cpu",
     "IMG_SIZE": 256,
-    "BATCH_SIZE": 32,     # 8GB显存建议16
-    "EPOCHS": 1,
+    "BATCH_SIZE": 16,     
+    "EPOCHS": 20,
     "LR": 0.0001,
     "SEED": 42,
     "MODELS": [
         "CBAM_UNET",
         "UNET",
-        "UNET_PLUS_PLUS",
+        "UNETPLUSPLUS",
         # "UNet_ResNet34",       # Baseline
         # "UNet++_ResNet34",     # 架构复杂化
         # "AttnUNet_ResNet34",   # 机制改进
