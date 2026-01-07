@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
+from scipy.io import loadmat
 from PIL import Image
 
 class ClothingDataset(Dataset):
@@ -20,7 +21,8 @@ class ClothingDataset(Dataset):
         # 定义图片和标签的文件夹路径
         # 根据你的截图，结构是 archive/images 和 archive/labels
         self.images_dir = os.path.join(root, 'images')
-        self.labels_dir = os.path.join(root, 'labels/pixel_level_labels_colored')
+        # 优先使用原始 .mat 标签（类别索引更可靠），避免彩色可视化标注导致整图为前景。
+        self.labels_dir = os.path.join(root, 'labels_raw/pixel_level_labels_mat')
         
         # 检查路径是否存在
         if not os.path.exists(self.images_dir) or not os.path.exists(self.labels_dir):
@@ -47,10 +49,8 @@ class ClothingDataset(Dataset):
         # 2. 构建完整路径
         img_path = os.path.join(self.images_dir, img_name)
         
-        # 推断 mask 文件名
-        # 假设 mask 和 image 同名，但后缀可能是 png
-        # 这个数据集通常 mask 是 png 格式
-        mask_name = os.path.splitext(img_name)[0] + ".png"
+        # 推断 mask 文件名（与图片同名，后缀为 .mat）
+        mask_name = os.path.splitext(img_name)[0] + ".mat"
         mask_path = os.path.join(self.labels_dir, mask_name)
         
         # 3. 加载图片
@@ -58,17 +58,19 @@ class ClothingDataset(Dataset):
         
         # 尝试加载 Mask，如果找不到文件，为了防止报错，给一个全黑的
         if os.path.exists(mask_path):
-            mask = Image.open(mask_path).convert("L") # 转灰度
+            mat = loadmat(mask_path)
+            if 'groundtruth' not in mat:
+                raise KeyError(f"MAT 文件中未找到 'groundtruth': {mask_path}")
+            mask_np = mat['groundtruth']  # (H, W), uint8 类别索引
         else:
-            # 备用方案：有时候是 .jpg 或者在 labels_raw 里，这里简单处理：找不到就全黑
-            mask = Image.new('L', (self.img_size, self.img_size), 0)
+            # 备用方案：找不到就全黑（背景）
+            mask_np = np.zeros((self.img_size, self.img_size), dtype=np.uint8)
 
         # 4. 调整大小 (模仿 PetDataset)
         image = image.resize((self.img_size, self.img_size), Image.BILINEAR)
-        mask = mask.resize((self.img_size, self.img_size), Image.NEAREST)
-        
-        image = np.array(image)
-        mask = np.array(mask)
+        # 最近邻缩放以保持离散标签
+        mask_np = Image.fromarray(mask_np).resize((self.img_size, self.img_size), Image.NEAREST)
+        mask_np = np.array(mask_np)
 
         # ==========================================
         # 核心修改：处理 Mask 标签为二分类
@@ -76,9 +78,9 @@ class ClothingDataset(Dataset):
         # 原始 Clothing Dataset 中：0=背景，1~59=各种衣服/身体部位
         # 我们的目标：0=背景，1=前景(人+衣服)
         
-        new_mask = np.zeros_like(mask)
-        # 将所有非背景像素 (mask > 0) 设为 1
-        new_mask[mask > 0] = 1 
+        new_mask = np.zeros_like(mask_np, dtype=np.uint8)
+        # 将所有非背景像素 (类别索引 > 0) 设为 1
+        new_mask[mask_np > 0] = 1 
         
         # 5. 转换为 Tensor
         to_tensor = transforms.ToTensor()
