@@ -17,6 +17,7 @@ CONFIG = {
     "LR": 0.0001,
     "SEED": 42,
     "MODELS": [
+        "CBAM_UNET",
         "UNet_ResNet34",       # Baseline
         "UNet++_ResNet34",     # 架构复杂化
         "AttnUNet_ResNet34",   # 机制改进
