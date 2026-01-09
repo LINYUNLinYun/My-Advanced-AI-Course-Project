@@ -13,13 +13,14 @@ CONFIG = {
     "RESULTS_DIR": "./results",
     "DEVICE": "cuda" if torch.cuda.is_available() else "cpu",
     "IMG_SIZE": 256,
-    "BATCH_SIZE": 16,     
-    "EPOCHS": 20,
+    "BATCH_SIZE": 8,     
+    "EPOCHS": 15,
     "LR": 0.0001,
     "SEED": 42,
     "MODELS": [
-        "CBAM_UNET",
-        "UNET",
+        # "CBAM_UNET",
+        # "ABLATION_CBAM_UNET",
+        # "UNET",
         "UNETPLUSPLUS",
         # "UNet_ResNet34",       # Baseline
         # "UNet++_ResNet34",     # 架构复杂化
@@ -60,22 +61,15 @@ def main():
         # Training Loop
         for epoch in range(CONFIG["EPOCHS"]):
             train_loss = trainer.train_epoch(train_loader)
-            val_metrics = trainer.evaluate(test_loader)
-
-            history["loss"].append(train_loss)
-            history["iou"].append(val_metrics["iou"])
-            history["dice"].append(val_metrics["dice"])
-            history["ap"].append(val_metrics["ap"])
-            history["pq"].append(val_metrics["pq"])
+            metrics = trainer.evaluate(test_loader)
             
-            print(
-                f"Ep {epoch+1}/{CONFIG['EPOCHS']} | "
-                f"Loss: {train_loss:.4f} | "
-                f"IoU: {val_metrics['iou']:.4f} | "
-                f"Dice: {val_metrics['dice']:.4f} | "
-                f"AP: {val_metrics['ap']:.4f} | "
-                f"PQ: {val_metrics['pq']:.4f}"
-            )
+            history["loss"].append(train_loss)
+            history["iou"].append(metrics["iou"])
+            history["dice"].append(metrics["dice"])
+            history["ap"].append(metrics["ap"])
+            history["pq"].append(metrics["pq"])
+            
+            print(f"Ep {epoch+1}/{CONFIG['EPOCHS']} | Loss: {train_loss:.4f} | IoU: {metrics['iou']:.4f} | Dice: {metrics['dice']:.4f} | AP: {metrics['ap']:.4f} | PQ: {metrics['pq']:.4f}")
             
         print(f"耗时: {(time.time()-start_time)/60:.1f} min")
         

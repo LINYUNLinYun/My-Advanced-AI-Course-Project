@@ -59,7 +59,7 @@ class Trainer:
                 # 计算 IoU
                 tp, fp, fn, tn = smp.metrics.get_stats(pr_masks.long(), masks.long(), mode='binary', threshold=0.5)
                 iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="micro")
-                dice = smp.metrics.fscore(tp, fp, fn, tn, beta=1.0, reduction="micro")
+                dice = smp.metrics.f1_score(tp, fp, fn, tn, reduction="micro")
                 running_iou += iou
                 running_dice += dice
 

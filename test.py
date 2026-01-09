@@ -55,24 +55,24 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    from src.utils import visualize_saved_models
-    model_specs = [
-        ("CBAM_UNET", "results/2026-01-07_10-21-40_CBAM_UNET.pth"),
-        ("UNET", "results/2026-01-07_10-22-47_UNET.pth"),
-        ("UNETPLUSPLUS", "results/2026-01-07_10-25-41_UNETPLUSPLUS.pth"),
-    ]
-    out_path = visualize_saved_models(
-        model_specs,
-        data_dir="./dataset/archive",
-        device="cuda",
-        save_dir="./results",
-        img_size=256,
-        batch_size=4,
-        num_samples=3,
-        save_name="visual_comparison.png",
-    )
-    print("saved to:", out_path)
+    main()
+    # from src.utils import visualize_saved_models
+    # model_specs = [
+    #     ("CBAM_UNET", "results/2026-01-07_10-21-40_CBAM_UNET.pth"),
+    #     ("UNET", "results/2026-01-07_10-22-47_UNET.pth"),
+    #     ("UNETPLUSPLUS", "results/2026-01-07_10-25-41_UNETPLUSPLUS.pth"),
+    # ]
+    # out_path = visualize_saved_models(
+    #     model_specs,
+    #     data_dir="./dataset/archive",
+    #     device="cuda",
+    #     save_dir="./results",
+    #     img_size=256,
+    #     batch_size=4,
+    #     num_samples=3,
+    #     save_name="visual_comparison.png",
+    # )
+    # print("saved to:", out_path)
     pass
     
 

@@ -7,6 +7,7 @@ dataset/
 
 # 忽略训练结果（因为权重文件很大）
 results/*.pth
+results/
 # results/*.png
 
 

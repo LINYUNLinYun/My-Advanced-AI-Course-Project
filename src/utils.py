@@ -22,24 +22,26 @@ def count_parameters(model):
 
 def plot_history(results, save_dir, save_name = "metrics_comparison.png"):
     """绘制训练 Loss 和 IoU 曲线"""
-    metrics = ["loss", "iou", "dice", "ap", "pq"]
-    n_rows = 2
-    n_cols = 3
-    plt.figure(figsize=(4*n_cols, 3*n_rows))
-    plot_idx = 1
-
-    for metric in metrics:
-        plt.subplot(n_rows, n_cols, plot_idx)
-        for name, hist in results.items():
-            if metric in hist:
-                plt.plot(hist[metric], label=name)
-        plt.title(metric.upper())
-        plt.xlabel("Epoch")
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        plot_idx += 1
-
-    plt.tight_layout()
+    plt.figure(figsize=(12, 5))
+    
+    # Loss
+    plt.subplot(1, 2, 1)
+    for name, hist in results.items():
+        plt.plot(hist["loss"], label=name)
+    plt.title("Training Loss")
+    plt.xlabel("Epoch")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    
+    # IoU
+    plt.subplot(1, 2, 2)
+    for name, hist in results.items():
+        plt.plot(hist["iou"], label=name)
+    plt.title("Validation IoU")
+    plt.xlabel("Epoch")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    
     plt.savefig(os.path.join(save_dir, save_name))
     plt.close()
 
@@ -93,43 +95,7 @@ def save_logs(results, save_dir, save_name="experiment_logs.csv"):
     for name, hist in results.items():
         data[f"{name}_loss"] = hist["loss"]
         data[f"{name}_iou"] = hist["iou"]
-        if "dice" in hist:
-            data[f"{name}_dice"] = hist["dice"]
-        if "ap" in hist:
-            data[f"{name}_ap"] = hist["ap"]
-        if "pq" in hist:
-            data[f"{name}_pq"] = hist["pq"]
     pd.DataFrame(data).to_csv(os.path.join(save_dir, save_name), index_label="epoch")
-
-
-def plot_metrics_from_csv(csv_path, save_dir, save_name="csv_metrics_comparison.png"):
-    """读取保存的 CSV，绘制各模型多指标对比曲线。"""
-    df = pd.read_csv(csv_path, index_col="epoch")
-    os.makedirs(save_dir, exist_ok=True)
-
-    # 提取模型名和指标
-    columns = df.columns
-    models = sorted({col.split("_")[0] for col in columns})
-    metrics = sorted({col.split("_")[1] for col in columns})
-
-    n_rows = max(1, (len(metrics) + 2) // 3)
-    n_cols = min(3, len(metrics))
-    plt.figure(figsize=(4*n_cols, 3*n_rows))
-
-    for idx, metric in enumerate(metrics, start=1):
-        plt.subplot(n_rows, n_cols, idx)
-        for model in models:
-            col_name = f"{model}_{metric}"
-            if col_name in df.columns:
-                plt.plot(df.index, df[col_name], label=model)
-        plt.title(metric.upper())
-        plt.xlabel("Epoch")
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-
-    plt.tight_layout()
-    plt.savefig(os.path.join(save_dir, save_name))
-    plt.close()
 
 
 def visualize_saved_models(model_specs, data_dir, device, save_dir, img_size=256, batch_size=4, num_samples=3, save_name="visual_comparison.png"):

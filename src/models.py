@@ -49,6 +49,13 @@ def get_model(model_name):
     elif model_name == "CBAM_UNET":
         from src.attention_unet import AttentionUNet
         return AttentionUNet(n_channels=3, n_classes=1, base_c=64)
+    elif model_name == "ABLATION_CBAM_UNET":
+        from src.ablation_attention_unet import ConfigurableUNet
+        return ConfigurableUNet(3, 1, config={
+                    'use_smart_ratio': True,
+                    'use_residual': True,
+                    'attention_mode': 'deep_only',
+                })
     elif model_name == "UNET":
         from src.unet import UNet
         return UNet(n_channels=3, n_classes=1, base_c=64)

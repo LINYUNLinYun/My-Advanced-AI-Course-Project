@@ -42,6 +42,12 @@ class ClothingDataset(Dataset):
         
         print(f"Found {len(self.img_files)} images with valid annotations (out of {len(all_img_files)} total images)")
         
+        # 【修复】使用固定种子打乱数据，避免数据泄露
+        rng = np.random.RandomState(42)  # 固定种子确保可重现性
+        indices = np.arange(len(self.img_files))
+        rng.shuffle(indices)
+        self.img_files = [self.img_files[i] for i in indices]
+        
         # 手动划分训练集和测试集 (这里按 9:1 划分)
         split_idx = int(len(self.img_files) * 0.9)
         if mode == 'train':
